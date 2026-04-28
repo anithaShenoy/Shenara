@@ -1,0 +1,26 @@
+# Build output
+bin/
+obj/
+dist/
+
+# Frontend dependencies and generated files
+node_modules/
+.vite/
+
+# Logs
+*.log
+
+# Local database/files
+*.db
+*.mdf
+*.ldf
+
+# User and IDE files
+.vs/
+.vscode/
+*.user
+*.suo
+
+# OS files
+Thumbs.db
+.DS_Store
