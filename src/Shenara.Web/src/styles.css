@@ -42,6 +42,11 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .site-shell {
   min-height: 100vh;
   background: #fbf7f2;
@@ -397,6 +402,12 @@ textarea {
   margin-bottom: 4px;
 }
 
+.login-copy {
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+
 .admin-shell {
   background: #f7f3ee;
   display: grid;
@@ -458,6 +469,11 @@ textarea {
   margin-top: auto;
 }
 
+.top-signout {
+  margin-top: 0;
+  min-height: 44px;
+}
+
 .admin-main {
   padding: clamp(22px, 4vw, 44px);
 }
@@ -468,6 +484,14 @@ textarea {
   gap: 20px;
   justify-content: space-between;
   margin-bottom: 26px;
+}
+
+.admin-header-actions {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
 }
 
 .admin-header h1 {
@@ -515,6 +539,28 @@ textarea {
   margin-bottom: 2px;
 }
 
+.edit-banner {
+  background: #f6ede6;
+  border: 1px solid #e4d3c4;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+}
+
+.edit-banner strong {
+  color: var(--clay);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.edit-banner span {
+  color: var(--ink);
+  font-weight: 800;
+}
+
 .form-pair {
   display: grid;
   gap: 12px;
@@ -542,10 +588,17 @@ textarea {
   padding: 18px;
 }
 
+.inventory-panel-header {
+  align-items: start;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
 .inventory-tools {
   display: grid;
   gap: 12px;
-  grid-template-columns: minmax(0, 1fr) 190px;
+  grid-template-columns: minmax(220px, 1fr) 170px 170px 160px;
   margin-bottom: 14px;
 }
 
@@ -626,6 +679,26 @@ textarea {
   font-weight: 800;
   padding: 28px;
   text-align: center;
+}
+
+.pagination-bar {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.pagination-bar p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.pagination-actions {
+  display: flex;
+  gap: 10px;
 }
 
 .panel-title h2 {
@@ -792,6 +865,13 @@ textarea {
   .section-heading,
   .admin-header {
     align-items: start;
+    flex-direction: column;
+  }
+
+  .admin-header-actions,
+  .inventory-panel-header,
+  .pagination-bar {
+    align-items: stretch;
     flex-direction: column;
   }
 

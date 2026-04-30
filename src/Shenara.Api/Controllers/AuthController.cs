@@ -1,24 +1,41 @@
 using Microsoft.AspNetCore.Mvc;
+using Shenara.Api.Services;
 
 namespace Shenara.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController(IConfiguration configuration) : ControllerBase
+public class AuthController(AdminAuthService authService) : ControllerBase
 {
     [HttpPost("login")]
     public IActionResult Login(LoginRequest request)
     {
-        var username = configuration["Admin:Username"] ?? "admin";
-        var password = configuration["Admin:Password"] ?? "admin123";
-        var token = configuration["Admin:Token"] ?? "dev-admin-token";
-
-        if (!string.Equals(request.Username, username, StringComparison.OrdinalIgnoreCase) || request.Password != password)
+        if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
         {
-            return Unauthorized(new { message = "Invalid admin credentials." });
+            return BadRequest(new { message = "Username and password are required." });
         }
 
-        return Ok(new { token, displayName = "Shenara Admin" });
+        var authResult = authService.ValidateCredentials(request.Username, request.Password, HttpContext.Connection.RemoteIpAddress?.ToString());
+
+        if (authResult.IsLockedOut)
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests, new
+            {
+                message = "Too many failed login attempts. Try again later.",
+                lockedUntilUtc = authResult.LockedUntilUtc
+            });
+        }
+
+        if (!authResult.IsSuccess)
+        {
+            return Unauthorized(new
+            {
+                message = "Invalid admin credentials.",
+                remainingAttempts = authResult.RemainingAttempts
+            });
+        }
+
+        return Ok(new { token = authResult.Token, displayName = "Shenara Admin" });
     }
 }
 

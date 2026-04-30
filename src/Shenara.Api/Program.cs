@@ -11,6 +11,7 @@ builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddDbContext<ShenaraDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Shenara")));
+builder.Services.AddSingleton<AdminAuthService>();
 builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<PublicContentService>();
 builder.Services.AddScoped<AdminTokenFilter>();
@@ -39,6 +40,8 @@ using (var scope = app.Services.CreateScope())
     {
         dbContext.Database.EnsureCreated();
     }
+
+    await InventorySeedData.SeedInvoiceInventoryAsync(dbContext);
 }
 
 app.Run();

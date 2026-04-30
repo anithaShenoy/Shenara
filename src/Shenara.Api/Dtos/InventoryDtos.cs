@@ -5,6 +5,15 @@ namespace Shenara.Api.Dtos;
 
 public record InventoryCategoryDto(int Id, string Name, string? Description);
 
+public record InventoryPagedResultDto(
+    IReadOnlyList<InventoryItemDto> Items,
+    int Page,
+    int PageSize,
+    int TotalCount,
+    int TotalPages,
+    int LowStockCount,
+    int FeaturedCount);
+
 public record InventoryItemDto(
     int Id,
     string Name,
@@ -22,6 +31,16 @@ public record InventoryItemDto(
     decimal? RentalPrice,
     bool IsFeatured,
     DateTimeOffset UpdatedAt);
+
+public class InventoryQueryDto
+{
+    public string? Search { get; set; }
+    public int? CategoryId { get; set; }
+    public InventoryStatus? Status { get; set; }
+    public string? Color { get; set; }
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 12;
+}
 
 public class UpsertInventoryItemDto
 {

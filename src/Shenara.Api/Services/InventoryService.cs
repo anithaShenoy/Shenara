@@ -7,6 +7,8 @@ namespace Shenara.Api.Services;
 
 public class InventoryService(ShenaraDbContext dbContext)
 {
+    private const int MaxPageSize = 24;
+
     public async Task<IReadOnlyList<InventoryCategoryDto>> GetCategoriesAsync()
     {
         return await dbContext.InventoryCategories
@@ -15,29 +17,59 @@ public class InventoryService(ShenaraDbContext dbContext)
             .ToListAsync();
     }
 
-    public async Task<IReadOnlyList<InventoryItemDto>> GetItemsAsync(string? search, int? categoryId, InventoryStatus? status)
+    public async Task<IReadOnlyList<string>> GetColorsAsync()
+    {
+        return await dbContext.InventoryItems
+            .Where(item => item.Color != null && item.Color != string.Empty)
+            .Select(item => item.Color!)
+            .Distinct()
+            .OrderBy(color => color)
+            .ToListAsync();
+    }
+
+    public async Task<InventoryPagedResultDto> GetItemsAsync(InventoryQueryDto queryDto)
     {
         var query = dbContext.InventoryItems.Include(item => item.Category).AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(search))
+        if (!string.IsNullOrWhiteSpace(queryDto.Search))
         {
-            query = query.Where(item => item.Name.Contains(search) || (item.Description != null && item.Description.Contains(search)));
+            query = query.Where(item =>
+                item.Name.Contains(queryDto.Search) ||
+                (item.Description != null && item.Description.Contains(queryDto.Search)) ||
+                (item.Color != null && item.Color.Contains(queryDto.Search)));
         }
 
-        if (categoryId.HasValue)
+        if (queryDto.CategoryId.HasValue)
         {
-            query = query.Where(item => item.InventoryCategoryId == categoryId);
+            query = query.Where(item => item.InventoryCategoryId == queryDto.CategoryId);
         }
 
-        if (status.HasValue)
+        if (queryDto.Status.HasValue)
         {
-            query = query.Where(item => item.Status == status);
+            query = query.Where(item => item.Status == queryDto.Status);
         }
 
-        return await query
+        if (!string.IsNullOrWhiteSpace(queryDto.Color))
+        {
+            query = query.Where(item => item.Color == queryDto.Color);
+        }
+
+        var page = Math.Max(1, queryDto.Page);
+        var pageSize = Math.Clamp(queryDto.PageSize, 1, MaxPageSize);
+        var totalCount = await query.CountAsync();
+        var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
+        var normalizedPage = Math.Min(page, totalPages);
+        var lowStockCount = await query.CountAsync(item => item.AvailableQuantity <= item.MinimumStockAlert);
+        var featuredCount = await query.CountAsync(item => item.IsFeatured);
+
+        var items = await query
             .OrderBy(item => item.Name)
+            .Skip((normalizedPage - 1) * pageSize)
+            .Take(pageSize)
             .Select(item => ToDto(item))
             .ToListAsync();
+
+        return new InventoryPagedResultDto(items, normalizedPage, pageSize, totalCount, totalPages, lowStockCount, featuredCount);
     }
 
     public async Task<InventoryItemDto?> GetItemAsync(int id)

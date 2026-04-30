@@ -16,10 +16,16 @@ public class InventoryController(InventoryService inventoryService) : Controller
         return Ok(await inventoryService.GetCategoriesAsync());
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<InventoryItemDto>>> GetItems([FromQuery] string? search, [FromQuery] int? categoryId, [FromQuery] InventoryStatus? status)
+    [HttpGet("colors")]
+    public async Task<ActionResult<IReadOnlyList<string>>> GetColors()
     {
-        return Ok(await inventoryService.GetItemsAsync(search, categoryId, status));
+        return Ok(await inventoryService.GetColorsAsync());
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<InventoryPagedResultDto>> GetItems([FromQuery] InventoryQueryDto query)
+    {
+        return Ok(await inventoryService.GetItemsAsync(query));
     }
 
     [HttpGet("{id:int}")]
