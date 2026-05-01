@@ -906,9 +906,25 @@ textarea {
 }
 
 .detail-grid,
+.gallery-detail-grid,
 .legal-grid {
   display: grid;
   gap: 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.gallery-detail-grid {
+  gap: clamp(18px, 2.4vw, 28px);
+  margin: 0 auto;
+  max-width: 1240px;
+}
+
+.gallery-detail-grid--1 {
+  grid-template-columns: minmax(0, 780px);
+  justify-content: center;
+}
+
+.gallery-detail-grid--6 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -929,8 +945,18 @@ textarea {
 }
 
 .detail-card img,
-.gallery-detail-card img {
+.gallery-detail-card img,
+.gallery-detail-card video {
   aspect-ratio: 4 / 3;
+}
+
+.gallery-detail-card img,
+.gallery-detail-card video {
+  background: #eee5dd;
+  display: block;
+  object-fit: cover;
+  object-position: center top;
+  width: 100%;
 }
 
 .detail-grid--4 .detail-card {
@@ -978,9 +1004,19 @@ textarea {
   line-height: 1.65;
 }
 
-.gallery-detail-card {
+.gallery-detail-grid .gallery-detail-card {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
+  grid-template-rows: auto 1fr;
+}
+
+.gallery-detail-grid .gallery-detail-card img,
+.gallery-detail-grid .gallery-detail-card video {
+  aspect-ratio: 4 / 5;
+}
+
+.gallery-detail-grid--1 .gallery-detail-card img,
+.gallery-detail-grid--1 .gallery-detail-card video {
+  aspect-ratio: 4 / 3;
 }
 
 .legal-shell .detail-header {
@@ -990,8 +1026,7 @@ textarea {
 @media (max-width: 980px) {
   .hero,
   .contact-section,
-  .admin-grid,
-  .gallery-detail-card {
+  .admin-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1003,6 +1038,7 @@ textarea {
   .service-grid,
   .gallery-grid,
   .detail-grid,
+  .gallery-detail-grid,
   .legal-grid {
     grid-template-columns: 1fr;
   }

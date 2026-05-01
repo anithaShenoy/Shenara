@@ -11,6 +11,22 @@ This plan reflects the current product direction and the design changes already 
 
 ## Current Design Direction
 
+### Design Decisions So Far
+
+These decisions reflect the implemented product direction as of May 1, 2026.
+
+- Public routes use SEO-friendly path URLs instead of hash routes.
+- Main public URLs are `/`, `/services`, `/services/balloon-decor`, `/services/back-arch-styling`, `/gallery`, `/gallery/blush-birthday-backdrop`, `/gallery/elegant-reception-detail`, `/gallery/soft-fabric-celebration-setup`, `/contact`, `/privacy`, `/accessibility`, and `/terms`.
+- The admin portal remains private by direct URL only, using `/admin` and `/admin/inquiries`; it is not linked from the public navigation.
+- `Custom Event Setups` should not have a public service detail URL. Its service card routes to `/contact`, and `/services/custom-event-setups` redirects in-app to `/contact`.
+- Public service cards use the original API service images and landscape card framing.
+- Dedicated `Balloon Decor` and `Back Arch Styling` detail pages use local images from `src/Shenara.Web/public/assets/Balloon Decor` and `src/Shenara.Web/public/assets/Back arch styling`.
+- Four-image service detail pages use a portrait-aware responsive showcase: four columns on wide screens, two columns on tablet, and one column on mobile.
+- Gallery detail URLs use descriptive slugs instead of numeric IDs.
+- Current public service pricing is `Balloon Decor` from `$45`, `Back Arch Styling` from `$220`, and `Custom Event Setups` by custom quote.
+- `robots.txt` and `sitemap.xml` are present for SEO hygiene; production deployment must replace localhost URLs with the live domain.
+- The API startup includes local-development schema repair/sync logic for existing SQL Server databases that predate current migrations.
+
 ### Public Website
 
 The public website uses a premium event-brand visual language instead of a generic SaaS layout.
@@ -23,6 +39,8 @@ Implemented design choices:
 - Service cards with photography and simple pricing cues
 - Gallery section with image-led composition
 - Inquiry section designed as a clean booking form rather than a plain contact block
+- Logo-led brand treatment using the local Shenara logo asset
+- Clean public navigation without visible admin entry points
 
 Public UX goals:
 
@@ -136,13 +154,17 @@ Current backend implementation notes:
 
 Current frontend behaviors in place:
 
-- Hash-based route split between public site and admin portal
+- Path-based SPA routing for SEO-friendly public URLs
+- Direct-link support for public service, gallery, legal, contact, and admin routes
+- Smooth in-page section scrolling for `/services`, `/gallery`, and `/contact`
 - Shared API request helper
-- Admin login persisted through local storage token
+- Admin login persisted through session storage token
 - Inventory form with create/edit modes
 - Inventory table with thumbnails and actions
 - Inquiry management view
 - Professional styling with shared CSS variables
+- Dynamic metadata updates for page title, meta description, Open Graph text, and canonical URL
+- Public sitemap and robots files in `src/Shenara.Web/public`
 
 ## Design Standards Going Forward
 
@@ -421,36 +443,46 @@ These instructions reflect the latest requested direction for the Shenara Event 
 
 ### Public Site Navigation and Branding
 
-- Remove the visible admin link from the public website navigation
-- Admin access should still be possible privately by directly visiting the admin route
-- Add the Shenara logo from the local `assets` folder to the public site branding
-- Use the logo consistently in the public header and any appropriate brand areas
+Implemented decisions:
+
+- The visible admin link has been removed from public website navigation.
+- Admin access remains possible privately by directly visiting `/admin`.
+- The Shenara logo from the local `assets` folder is used in public and admin branding.
+- Public navigation uses clean path URLs, not hash URLs.
 
 ### Public Service Detail Pages
 
 The Services section should no longer behave like static cards only.
 
-Required behavior:
+Implemented behavior:
 
-- `Back Arch Styling` should open a dedicated page
-- That page should display the images from the `Back Arch Styling` folder
-- Each image should have a polished, event-appropriate description
-- `Balloon Decor` should open a dedicated page
-- That page should display the images from the `Balloon Decor` folder
-- Each image should have a polished, event-appropriate description
+- `Back Arch Styling` opens `/services/back-arch-styling`.
+- That page displays the images from the `Back arch styling` folder.
+- Each back arch image has polished, event-appropriate copy.
+- `Balloon Decor` opens `/services/balloon-decor`.
+- That page displays the images from the `Balloon Decor` folder.
+- Each balloon image has polished, event-appropriate copy.
+- Four-image service pages use a portrait-aware responsive grid.
+- `Custom Event Setups` does not have a service detail page and routes to `/contact`.
 
 These pages should feel like real visual service showcases, not placeholder galleries.
 
 ### Gallery Detail Pages
 
-- Each gallery item should link to its own detail page
-- Clicking a gallery section or gallery image should route to a dedicated page
-- The destination page should present the image or image set in a more immersive format with descriptive supporting copy
+Implemented decisions:
+
+- Each gallery item links to its own detail page.
+- Gallery URLs use descriptive slugs, not numeric IDs.
+- Current gallery detail URLs are `/gallery/blush-birthday-backdrop`, `/gallery/elegant-reception-detail`, and `/gallery/soft-fabric-celebration-setup`.
+- Gallery detail pages present the image in a larger format with descriptive supporting copy.
 
 ### Inquiry Admin Experience
 
-- Fix the inquiries page status filter so it behaves correctly and consistently in the admin portal
-- Make sure inquiry status filtering stays accurate after status updates, refreshes, and view changes
+Implemented decisions:
+
+- The inquiries page includes status filtering inside the admin portal.
+- Status updates refresh the local inquiry state so filtered views remain accurate after changes.
+- Inquiry load failures are surfaced to the admin instead of silently showing an empty list.
 
 ### Inquiry Protection and Abuse Controls
 
@@ -474,8 +506,8 @@ The current admin security model is not sufficient for production and must be up
 Known issues to address:
 
 - Admin credentials and token are hardcoded in configuration
-- The admin token is stored in `localStorage`
-- API startup does not yet include production-grade HTTPS, HSTS, CSP, rate limiting, or CSRF protections
+- The admin token is stored in `sessionStorage`, which is suitable for local development but still not a production authentication model
+- API startup includes development security improvements such as rate limiting, CSP headers, HSTS in non-development, and HTTPS redirection in non-development, but this is not yet a full production security posture
 
 Required direction:
 
@@ -524,7 +556,7 @@ If commerce is later introduced:
 
 The site needs a more complete SEO setup.
 
-Required additions:
+Implemented additions:
 
 - Unique page titles per route
 - Meta descriptions per route
@@ -533,6 +565,10 @@ Required additions:
 - Structured data using JSON-LD for business information
 - `robots.txt`
 - XML sitemap
+
+Remaining production requirement:
+
+- Replace localhost sitemap, canonical, and structured-data URLs with the production domain before launch.
 
 ### Inventory Management Expansion
 
@@ -560,12 +596,11 @@ Required direction:
 
 Recommended order for upcoming work:
 
-1. Remove public admin link and add logo from assets
-2. Add service detail pages and gallery detail pages
-3. Add inquiry duplicate prevention and IP-based rate limiting
-4. Improve admin authentication and production security posture
-5. Implement accessibility fixes in the actual UI
-6. Add legal/business pages
-7. Add SEO metadata, sitemap, and robots support
-8. Expand inventory operations with uploads, sorting, and audit history
-9. Move fully to migrations-based database lifecycle
+1. Improve admin authentication and production security posture.
+2. Replace localhost SEO URLs with the production domain before deployment.
+3. Add a production SPA fallback/rewrite rule so direct URLs like `/services/balloon-decor` load `index.html`.
+4. Continue accessibility verification with keyboard, mobile, and automated checks.
+5. Expand inventory operations with uploads, sorting, category management, and audit history.
+6. Move fully to a clean migrations-based database lifecycle without local repair shortcuts.
+7. Replace temporary/public placeholder business copy with final approved business information.
+8. Add production analytics only after privacy and cookie-consent decisions are finalized.

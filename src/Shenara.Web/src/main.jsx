@@ -34,10 +34,94 @@ const fallbackServices = [
   }
 ];
 
-const fallbackGallery = [
-  { id: 1, title: 'Blush birthday backdrop', eventType: 'Birthday', imageUrl: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=900&q=80', isFeatured: true },
-  { id: 2, title: 'Elegant reception detail', eventType: 'Reception', imageUrl: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=900&q=80', isFeatured: true },
-  { id: 3, title: 'Soft fabric celebration setup', eventType: 'Shower', imageUrl: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=900&q=80', isFeatured: true }
+const galleryCollections = [
+  {
+    id: 'baby-shower',
+    title: 'Baby Shower',
+    eventType: 'Soft celebration styling',
+    imageUrl: '/assets/Gallery/Baby%20Shower/1000044844.jpg',
+    summary: 'Gentle balloon styling and a sweet focal setup for welcoming a little one.',
+    items: [
+      {
+        title: 'Sweet arrival backdrop',
+        description: 'A soft baby shower moment with a calm palette, rounded balloon volume, and a photo-friendly focal point for family memories.',
+        mediaUrl: '/assets/Gallery/Baby%20Shower/1000044844.jpg',
+        type: 'image'
+      }
+    ]
+  },
+  {
+    id: 'birthday-decor',
+    title: 'Birthday Decor',
+    eventType: 'Birthday styling',
+    imageUrl: '/assets/Gallery/Birthday%20Decor/1000038891.jpg',
+    summary: 'Playful birthday setups with personalized color stories and celebratory balloon details.',
+    items: [
+      {
+        title: 'Personal birthday feature',
+        description: 'A polished birthday setup designed around a clear focal wall, soft balloon clusters, and space for cake table styling.',
+        mediaUrl: '/assets/Gallery/Birthday%20Decor/1000038891.jpg',
+        type: 'image'
+      },
+      {
+        title: 'Layered celebration palette',
+        description: 'A cheerful balloon arrangement with balanced color placement, ideal for photos, guest arrivals, and party table moments.',
+        mediaUrl: '/assets/Gallery/Birthday%20Decor/1000043892.jpg',
+        type: 'image'
+      },
+      {
+        title: 'Statement birthday scene',
+        description: 'A fuller birthday decor look with height, dimension, and a finished backdrop that makes the celebration feel complete.',
+        mediaUrl: '/assets/Gallery/Birthday%20Decor/1000053724.jpg',
+        type: 'image'
+      }
+    ]
+  },
+  {
+    id: 'special-occasions',
+    title: 'Special Occasions',
+    eventType: 'Custom event styling',
+    imageUrl: '/assets/Gallery/Special%20Occasions/1000044566.jpg',
+    summary: 'Custom styling for milestones, intimate gatherings, and photo-ready celebration moments.',
+    items: [
+      {
+        title: 'Milestone celebration setup',
+        description: 'A refined occasion backdrop with coordinated balloon styling and a clean event-ready composition.',
+        mediaUrl: '/assets/Gallery/Special%20Occasions/1000044566.jpg',
+        type: 'image'
+      },
+      {
+        title: 'Elegant detail moment',
+        description: 'A styled decor detail that brings texture, shape, and warmth into the overall celebration story.',
+        mediaUrl: '/assets/Gallery/Special%20Occasions/1000048509.png',
+        type: 'image'
+      },
+      {
+        title: 'Room-ready event motion',
+        description: 'A short event view showing how the decor reads in the room, with volume, color, and spacing working together.',
+        mediaUrl: '/assets/Gallery/Special%20Occasions/1000048525.mp4',
+        type: 'video'
+      },
+      {
+        title: 'Walkthrough styling view',
+        description: 'A moving look at the setup that helps customers understand the full scale and flow of the decor moment.',
+        mediaUrl: '/assets/Gallery/Special%20Occasions/1000048633.mp4',
+        type: 'video'
+      },
+      {
+        title: 'Custom occasion accent',
+        description: 'A tailored decor accent with a polished finish, ideal for milestone photos and intimate celebration spaces.',
+        mediaUrl: '/assets/Gallery/Special%20Occasions/1000050503.png',
+        type: 'image'
+      },
+      {
+        title: 'Finished celebration scene',
+        description: 'A complete special occasion setup with a balanced focal point, thoughtful styling, and guest-ready presentation.',
+        mediaUrl: '/assets/Gallery/Special%20Occasions/1000053727.jpg',
+        type: 'image'
+      }
+    ]
+  }
 ];
 
 const serviceDetailContent = {
@@ -180,7 +264,7 @@ function servicePath(name) {
 }
 
 function galleryPath(image) {
-  return `/gallery/${slugify(image.title)}`;
+  return `/gallery/${image.id}`;
 }
 
 function currentRoute() {
@@ -376,13 +460,12 @@ function App() {
 
 function PublicSite({ route }) {
   const [services, setServices] = useState(fallbackServices);
-  const [gallery, setGallery] = useState(fallbackGallery);
+  const [gallery, setGallery] = useState(galleryCollections);
   const [inquiry, setInquiry] = useState({ customerName: '', email: '', phone: '', eventDate: '', eventType: '', message: '' });
   const [inquiryFeedback, setInquiryFeedback] = useState({ type: '', message: '' });
 
   useEffect(() => {
     request('/services').then(setServices).catch(() => setServices(fallbackServices));
-    request('/gallery').then(setGallery).catch(() => setGallery(fallbackGallery));
   }, []);
 
   const routeView = useMemo(() => {
@@ -430,10 +513,8 @@ function PublicSite({ route }) {
 
   if (routeView.type === 'gallery') {
     const galleryItem =
-      gallery.find((entry) => slugify(entry.title) === routeView.slug) ??
-      fallbackGallery.find((entry) => slugify(entry.title) === routeView.slug) ??
-      gallery.find((entry) => String(entry.id) === routeView.slug) ??
-      fallbackGallery.find((entry) => String(entry.id) === routeView.slug);
+      gallery.find((entry) => entry.id === routeView.slug) ??
+      gallery.find((entry) => slugify(entry.title) === routeView.slug);
     return (
       <PublicShell>
         <GalleryDetailPage galleryItem={galleryItem} />
@@ -559,14 +640,14 @@ function HomePage({ services, gallery, inquiry, setInquiry, inquiryFeedback, onS
       <section className="section gallery-section" id="gallery">
         <div className="section-heading">
           <p className="eyebrow">Gallery</p>
-          <h2>Soft palettes, bold moments, clean details</h2>
+          <h2>Real setups for birthdays, showers, and special occasions</h2>
         </div>
         <div className="gallery-grid">
           {gallery.map((image) => (
             <a className="gallery-link" href={galleryPath(image)} key={image.id}>
               <figure>
                 <img src={image.imageUrl} alt={image.title} />
-                <figcaption>{image.title}<span>{image.eventType}</span></figcaption>
+                <figcaption>{image.title}<span>{image.summary}</span></figcaption>
               </figure>
             </a>
           ))}
@@ -679,17 +760,24 @@ function GalleryDetailPage({ galleryItem }) {
       <div className="detail-header">
         <p className="eyebrow">Gallery</p>
         <h1>{galleryItem.title}</h1>
-        <p className="hero-text">{galleryItem.eventType} styling with soft detail work, polished framing, and a setup designed to feel celebratory in person and in photographs.</p>
+        <p className="hero-text">{galleryItem.summary}</p>
         <a className="secondary-action" href="/gallery">Back to Gallery</a>
       </div>
-      <article className="gallery-detail-card">
-        <img src={galleryItem.imageUrl} alt={galleryItem.title} />
-        <div>
-          <h2>{galleryItem.eventType || 'Celebration styling'}</h2>
-          <p>This gallery moment captures the kind of layered decor Shenara Event Decor is building toward: balanced color, a clear focal point, and styling that feels intentional from the first glance.</p>
-          <p>Use this direction as a reference point for your own inquiry if you want a similar mood, palette, or layout.</p>
-        </div>
-      </article>
+      <div className={`gallery-detail-grid gallery-detail-grid--${galleryItem.items.length}`}>
+        {galleryItem.items.map((item) => (
+          <article className="gallery-detail-card" key={item.mediaUrl}>
+            {item.type === 'video' ? (
+              <video src={item.mediaUrl} controls muted playsInline preload="metadata" aria-label={item.title} />
+            ) : (
+              <img src={item.mediaUrl} alt={item.title} />
+            )}
+            <div>
+              <h2>{item.title}</h2>
+              <p>{item.description}</p>
+            </div>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }
