@@ -5,6 +5,8 @@ namespace Shenara.Api.Data;
 
 public class ShenaraDbContext(DbContextOptions<ShenaraDbContext> options) : DbContext(options)
 {
+    private static readonly DateTimeOffset SeededAtUtc = new(2026, 4, 27, 0, 0, 0, TimeSpan.Zero);
+
     public DbSet<InventoryCategory> InventoryCategories => Set<InventoryCategory>();
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
     public DbSet<InventoryImage> InventoryImages => Set<InventoryImage>();
@@ -20,6 +22,9 @@ public class ShenaraDbContext(DbContextOptions<ShenaraDbContext> options) : DbCo
         modelBuilder.Entity<InventoryItem>().Property(item => item.RentalPrice).HasPrecision(10, 2);
         modelBuilder.Entity<BookingInquiry>().HasIndex(inquiry => inquiry.Status);
         modelBuilder.Entity<BookingInquiry>().HasIndex(inquiry => inquiry.EventDate);
+        modelBuilder.Entity<BookingInquiry>().HasIndex(inquiry => inquiry.CreatedAt);
+        modelBuilder.Entity<BookingInquiry>().HasIndex(inquiry => inquiry.Email);
+        modelBuilder.Entity<BookingInquiry>().HasIndex(inquiry => inquiry.RemoteAddress);
 
         modelBuilder.Entity<InventoryCategory>().HasData(
             new InventoryCategory { Id = 1, Name = "Balloons", Description = "Balloon garlands, clusters, and color palettes." },
@@ -43,7 +48,9 @@ public class ShenaraDbContext(DbContextOptions<ShenaraDbContext> options) : DbCo
                 Size = "Large",
                 StorageLocation = "Shelf A1",
                 RentalPrice = 85,
-                IsFeatured = true
+                IsFeatured = true,
+                CreatedAt = SeededAtUtc,
+                UpdatedAt = SeededAtUtc
             },
             new InventoryItem
             {
@@ -59,7 +66,9 @@ public class ShenaraDbContext(DbContextOptions<ShenaraDbContext> options) : DbCo
                 Size = "7 ft",
                 StorageLocation = "Rack B",
                 RentalPrice = 120,
-                IsFeatured = true
+                IsFeatured = true,
+                CreatedAt = SeededAtUtc,
+                UpdatedAt = SeededAtUtc
             },
             new InventoryItem
             {
@@ -74,7 +83,9 @@ public class ShenaraDbContext(DbContextOptions<ShenaraDbContext> options) : DbCo
                 Color = "Ivory",
                 Size = "10 x 12 ft",
                 StorageLocation = "Bin C2",
-                RentalPrice = 65
+                RentalPrice = 65,
+                CreatedAt = SeededAtUtc,
+                UpdatedAt = SeededAtUtc
             }
         );
 
@@ -85,7 +96,7 @@ public class ShenaraDbContext(DbContextOptions<ShenaraDbContext> options) : DbCo
                 Name = "Balloon Decor",
                 Description = "Custom garlands, clusters, and installations designed around your event colors and venue.",
                 ImageUrl = "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1200&q=80",
-                StartingPrice = "From $180",
+                StartingPrice = "From $45",
                 IsFeatured = true
             },
             new ServiceOffering
@@ -94,7 +105,7 @@ public class ShenaraDbContext(DbContextOptions<ShenaraDbContext> options) : DbCo
                 Name = "Back Arch Styling",
                 Description = "Statement arches with layered balloons, fabric, florals, signage, and themed details.",
                 ImageUrl = "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=1200&q=80",
-                StartingPrice = "From $240",
+                StartingPrice = "From $220",
                 IsFeatured = true
             },
             new ServiceOffering

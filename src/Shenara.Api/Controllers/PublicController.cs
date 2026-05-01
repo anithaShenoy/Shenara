@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Shenara.Api.Dtos;
 using Shenara.Api.Services;
 
@@ -21,9 +22,21 @@ public class PublicController(PublicContentService contentService) : ControllerB
     }
 
     [HttpPost("inquiries")]
+    [EnableRateLimiting("public-inquiries")]
     public async Task<IActionResult> CreateInquiry(CreateInquiryDto dto)
     {
-        var id = await contentService.CreateInquiryAsync(dto);
-        return Created($"/api/inquiries/{id}", new { id });
+        var result = await contentService.CreateInquiryAsync(dto, HttpContext.Connection.RemoteIpAddress?.ToString());
+
+        if (result.IsDuplicate)
+        {
+            return Conflict(new { message = result.Message });
+        }
+
+        if (result.IsRateLimited)
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests, new { message = result.Message });
+        }
+
+        return Created($"/api/inquiries/{result.InquiryId}", new { id = result.InquiryId });
     }
 }

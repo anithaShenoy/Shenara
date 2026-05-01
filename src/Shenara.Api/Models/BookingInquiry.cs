@@ -23,6 +23,9 @@ public class BookingInquiry
     [MaxLength(1000)]
     public required string Message { get; set; }
 
+    [MaxLength(64)]
+    public string? RemoteAddress { get; set; }
+
     public InquiryStatus Status { get; set; } = InquiryStatus.New;
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

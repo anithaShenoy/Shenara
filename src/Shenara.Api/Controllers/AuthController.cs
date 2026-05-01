@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Shenara.Api.Services;
 
 namespace Shenara.Api.Controllers;
@@ -8,6 +9,7 @@ namespace Shenara.Api.Controllers;
 public class AuthController(AdminAuthService authService) : ControllerBase
 {
     [HttpPost("login")]
+    [EnableRateLimiting("admin-login")]
     public IActionResult Login(LoginRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))

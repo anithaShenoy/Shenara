@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>http://localhost:5173/</loc>
+  </url>
+  <url>
+    <loc>http://localhost:5173/services</loc>
+  </url>
+  <url>
+    <loc>http://localhost:5173/services/balloon-decor</loc>
+  </url>
+  <url>
+    <loc>http://localhost:5173/services/back-arch-styling</loc>
+  </url>
+  <url>
+    <loc>http://localhost:5173/gallery</loc>
+  </url>
+  <url>
+    <loc>http://localhost:5173/gallery/blush-birthday-backdrop</loc>
+  </url>
+  <url>
+    <loc>http://localhost:5173/gallery/elegant-reception-detail</loc>
+  </url>
+  <url>
+    <loc>http://localhost:5173/gallery/soft-fabric-celebration-setup</loc>
+  </url>
+  <url>
+    <loc>http://localhost:5173/privacy</loc>
+  </url>
+  <url>
+    <loc>http://localhost:5173/accessibility</loc>
+  </url>
+  <url>
+    <loc>http://localhost:5173/terms</loc>
+  </url>
+</urlset>

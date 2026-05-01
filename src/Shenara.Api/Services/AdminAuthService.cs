@@ -7,8 +7,10 @@ namespace Shenara.Api.Services;
 public class AdminAuthService(IConfiguration configuration)
 {
     private const int MaxAttempts = 3;
+    private static readonly TimeSpan SessionDuration = TimeSpan.FromHours(8);
     private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
     private static readonly ConcurrentDictionary<string, LoginAttemptState> AttemptStates = new();
+    private static readonly ConcurrentDictionary<string, AdminSession> Sessions = new();
 
     public AuthResult ValidateCredentials(string? username, string? password, string? remoteAddress)
     {
@@ -31,7 +33,7 @@ public class AdminAuthService(IConfiguration configuration)
             if (isUsernameMatch && isPasswordMatch)
             {
                 attemptState.Reset();
-                return AuthResult.Success(configuration["Admin:Token"] ?? "dev-admin-token");
+                return AuthResult.Success(CreateSessionToken(normalizedUsername, remoteAddress));
             }
 
             attemptState.FailedAttempts++;
@@ -42,6 +44,41 @@ public class AdminAuthService(IConfiguration configuration)
             }
 
             return AuthResult.Failed(MaxAttempts - attemptState.FailedAttempts);
+        }
+    }
+
+    public bool IsTokenValid(string? token)
+    {
+        PruneExpiredSessions();
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return false;
+        }
+
+        return Sessions.TryGetValue(token, out var session) && session.ExpiresAtUtc > DateTimeOffset.UtcNow;
+    }
+
+    private string CreateSessionToken(string username, string? remoteAddress)
+    {
+        PruneExpiredSessions();
+
+        var tokenBytes = RandomNumberGenerator.GetBytes(32);
+        var token = Convert.ToBase64String(tokenBytes);
+        Sessions[token] = new AdminSession(username, remoteAddress, DateTimeOffset.UtcNow.Add(SessionDuration));
+        return token;
+    }
+
+    private static void PruneExpiredSessions()
+    {
+        var nowUtc = DateTimeOffset.UtcNow;
+
+        foreach (var entry in Sessions)
+        {
+            if (entry.Value.ExpiresAtUtc <= nowUtc)
+            {
+                Sessions.TryRemove(entry.Key, out _);
+            }
         }
     }
 
@@ -69,6 +106,8 @@ public class AdminAuthService(IConfiguration configuration)
         }
     }
 }
+
+public record AdminSession(string Username, string? RemoteAddress, DateTimeOffset ExpiresAtUtc);
 
 public record AuthResult(bool IsSuccess, bool IsLockedOut, string? Token, int RemainingAttempts, DateTimeOffset? LockedUntilUtc)
 {
